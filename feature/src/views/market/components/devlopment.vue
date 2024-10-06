@@ -3,18 +3,18 @@
     <PluginList
       v-if="dev && !!dev.length"
       @downloadSuccess="downloadSuccess"
-      title="开发"
+      :title="$t('feature.market.developTool')"
       :list="dev"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount } from "vue";
-import request from "../../../assets/request/index";
-import PluginList from "./plugin-list.vue";
+import { ref, computed, onBeforeMount } from 'vue';
+import request from '../../../assets/request/index';
+import PluginList from './plugin-list.vue';
 
-import { useStore } from "vuex";
+import { useStore } from 'vuex';
 const store = useStore();
 const totalPlugins = computed(() => store.state.totalPlugins);
 
@@ -42,7 +42,6 @@ const dev = computed(() => {
 <style lang="less">
 .system {
   width: 100%;
-  height: 100vh;
   overflow-x: hidden;
   box-sizing: border-box;
 }

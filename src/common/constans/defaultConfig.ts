@@ -1,19 +1,32 @@
-import commonConst from "@/common/utils/commonConst";
-
 export default {
-  version: 2,
+  version: 7,
   perf: {
+    custom: {
+      theme: 'SPRING',
+      primaryColor: '#ff4ea4',
+      errorColor: '#ed6d46',
+      warningColor: '#e5a84b',
+      successColor: '#c0d695',
+      infoColor: '#aa8eeB',
+      logo: `file://${__static}/logo.png`,
+      placeholder: '你好，Rubick！请输入插件关键词',
+      username: 'Rubick',
+    },
     shortCut: {
-      showAndHidden: "Option+R",
-      separate: "Ctrl+D",
-      quit: "Shift+Escape",
+      showAndHidden: 'Option+R',
+      separate: 'Ctrl+D',
+      quit: 'Shift+Escape',
+      capture: 'Ctrl+Shift+A',
     },
     common: {
       start: true,
       space: true,
-      // 是否失焦隐藏。默认在dev环境不隐藏，在打包后隐藏。
-      hideOnBlur: commonConst.production(),
+      hideOnBlur: true,
       autoPast: false,
+      darkMode: false,
+      guide: false,
+      history: true,
+      lang: 'zh-CN',
     },
     local: {
       search: true,

@@ -2,9 +2,8 @@
 
 
 <div align= "center">
-<img align="center" width=200 src="https://user-images.githubusercontent.com/21073039/128333805-73e086f0-5523-46a3-a096-cba80b904c46.png" />
+<img align="center" width=200 src="./public/logo.png" />
 </div>
-
 
 <div align= "center">
  <h1>Rubick</h1>
@@ -14,7 +13,7 @@
     <img alt="release" src="https://img.shields.io/github/package-json/v/rubickCenter/rubick" />
  </a>
  <a href="https://github.com/rubickCenter/rubick/actions">
-   <img alt=building src=https://img.shields.io/github/workflow/status/rubickCenter/rubick/Build>
+   <img alt=building src=https://img.shields.io/github/actions/workflow/status/rubickCenter/rubick/main.yml>
  </a>
  <a href="https://github.com/rubickCenter/rubick/blob/master/LICENSE">
     <img alt="npm" src="https://img.shields.io/github/license/rubickCenter/rubick" />
@@ -27,40 +26,49 @@
 </a>
 </div>
 
+<div align= "center">
+<img align="center" src="https://picx.zhimg.com/80/v2-f8fe09ef125dac5fdcbef3fe00f92b21_720w.png" />
+</div>
 
-基于 electron 的开源工具箱，自由集成丰富插件，打造极致的桌面端效能工具。Rubick(拉比克) 是 dota 里面的英雄之一，其核心技能是插件化使用其他英雄的技能，用完即走。非常符合本工具的设计理念，所以取名 Rubick。
+开源的插件化桌面端效率工具箱。插件是基于 npm 进行安装和卸载，非常轻便。插件数据支持 webdav 多端同步，非常安全。支持内网部署，可二次定制化开发，非常灵活。
 
-## 安装包
+## 获取 rubick
+下载最新的安装包：
+
 * [Rubick Mac OS](https://github.com/rubickCenter/rubick/releases)
 * [Rubick Windows](https://github.com/rubickCenter/rubick/releases)
 * [Rubick Linux](https://github.com/rubickCenter/rubick/releases)
 
-## 支持能力
-- [x] 基于 npm 包模式的插件管理，安装插件和安装 npm 包一样简单
-- [x] 支持系统插件，只要在 rubick 运行时，插件可以随时使用
-- [x] 支持全局快捷键设置
-- [x] 支持剪贴板文件搜索
-- [x] 支持搜索本地已安装 app 或 偏好设置
-- [x] 支持 MacOS
-- [x] 支持 Windows
-- [x] 支持 Linux
-
 ## 使用文档
+
+[Rubick 官网](https://rubick.vip)
 
 [Rubick Docs](https://rubickCenter.github.io/rubick/)
 
+## 如何使用 rubick
 
-## 目前支持能力
+安装完成 rubick 后，可以通过快捷键 Alt/Option+R  可以快速呼起主程序。主程序输入框内输入关键词可以搜索出对应的 App、插件、文件... 选择即可使用。如果没有想要的功能，可以点击左侧的 logo 进入插件市场寻找自己想要的插件进行安装。
+
+## 支持能力
+- [x] 基于 npm 包模式的插件管理，安装插件和安装 npm 包一样简单
+- [x] 支持 webdav 多端数据同步，真正的数据安全同步
+- [x] 独一无二的系统插件模式，让插件成为 rubick 的一部分
+- [x] 支持快速启动本地 app、文件、文件夹
+- [x] 支持企业化内网部署
+- [x] 支持多语言
+
+
+## 核心功能展示
 ### 1. 搜索系统应用
 支持拼音和缩写来搜索系统安装应用：
 
-![](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/ba363e8f60f540e6a5c365c4317c4413~tplv-k3u1fbpfcp-watermark.image)
+![](https://pic1.zhimg.com/80/v2-70c105ff7fb1e955fc67ffa5a5564092_720w.gif)
 
 ### 2. UI类插件安装
 点击搜索框右侧 `rubick` 图标，进入插件市场，选择所需插件，点击下载按钮即可下载，下载完成后在已安装 tab 下可以找到安装插件。
 安装完成后，输入插件呼起命令即可使用对应插件：
 
-![](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/7ae45c7ede1f4e3bb7d35ae845e60b64~tplv-k3u1fbpfcp-watermark.image)
+![](https://pic1.zhimg.com/80/v2-5906bba20fe0a67f9e7a5a8c11341305_720w.gif)
 
 ### 3. 系统类插件安装
 系统插件安装方式和UI类一样，在插件市场选择`系统分类`，寻找适合自己的系统插件安装即可。
@@ -69,29 +77,41 @@
 系统插件安装成功后，需要重启 rubick 才能生效
 ```
 
-### 4. 输入框聚焦自动根据剪切板内容匹配插件
-在 `rubick` 内搜索`偏好设置`，然后开启`自动粘贴` 功能，即可匹配剪切板内容自动匹配适合插件进行使用。
+### 4. 基于 webdav 的多端数据同步
+在 `rubick` 内搜索`偏好设置` 进入 `账户和设置` -> `多端数据同步`；即可对 `rubick` 插件使用数据进行 `导出` 和 `导入`。
 
-![](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/01ef50fbfa064ba9a88bebe1531eacd4~tplv-k3u1fbpfcp-watermark.image)
+![](https://pic1.zhimg.com/80/v2-ff85793741e4dff82a729d3eb3d41551_720w.png)
 
-### 更多功能
-如果您还需要更多功能，欢迎来这里给我们提建议：[issues](https://github.com/rubickCenter/rubick/issues) 。
-有价值的想法我们会加入到后期的开发当中。同时也欢迎一起加入共建。
+## 关联仓库
+
+[Rubick 插件仓库](https://gitee.com/rubick-center)
+
+[Rubick 插件数据库](https://gitcode.net/rubickcenter/rubick-database)
+
+[Rubick Plugin CLI](https://github.com/rubickCenter/rubick-plugin-cli)
 
 ## 赞助
-开源不容易，如果该项目对你有用的话，可以打赏我们喝杯 coffee ☕️.
+### 1. 加入知识星球
+我们在知识星球积累了大量的关于 rubick 的知识和常见问题，您可以付费加入我们的知识星球来一起讨论。我们将随时解答！
 
-<img width=200 src=https://pic1.zhimg.com/80/v2-688385687a37e962fe32daf136139feb_720w.png />
-<img width=200 src=https://pica.zhimg.com/80/v2-1ba296fd2cece45ee1094ee7c259035c_720w.png />
+<img width=400 src=https://picx.zhimg.com/80/v2-6deabf65175d18080439ef813102d18c_720w.png />
 
-## 贡献
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)]. <a href="https://github.com/rubickCenter/rubick/graphs/contributors"><img src="https://opencollective.com/rubick/contributors.svg?width=890&button=false" /></a>
+### 2. 打赏喝杯咖啡
+如果项目对你有帮助，可以请我喝杯咖啡赞赏！
+
+<div align= "left">
+<img width="180" src="https://picx.zhimg.com/80/v2-911d249dc454f3460451a4e1ecceeb14_720w.png">
+<img width="180" src="https://picx.zhimg.com/80/v2-3160247d6099053405e6cd2cb6afb5e5_720w.png">
+</div>
 
 ## 反馈
 对本项目有兴趣或者想要交流学习的同学可以扫码加下面的微信，备注 rubick，帮助我们更好的成长：
 
 ![image](https://user-images.githubusercontent.com/21073039/127327603-9796f246-ee4b-4950-a69d-ce3205ec9569.png)
 
+## 贡献
+This project exists thanks to all the people who contribute. [[Contribute](https://github.com/rubickCenter/rubick/graphs/contributors)]. <a href="https://github.com/rubickCenter/rubick/graphs/contributors"><img src="https://opencollective.com/rubick/contributors.svg?width=890&button=false" /></a>
+
 ## License
-This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/rubickCenter/rubick/blob/master/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/rubickCenter/rubick/blob/master/LICENSE) file for details.
 

@@ -1,22 +1,27 @@
-import { ref, watch } from "vue";
-import throttle from "lodash.throttle";
-import { remote, ipcRenderer } from "electron";
-import pluginClickEvent from "./pluginClickEvent";
-import useFocus from "./clipboardWatch";
+import { ref, watch } from 'vue';
+import debounce from 'lodash.debounce';
+import { ipcRenderer } from 'electron';
+import { getGlobal } from '@electron/remote';
+import PinyinMatch from 'pinyin-match';
+import pluginClickEvent from './pluginClickEvent';
+import useFocus from './clipboardWatch';
 
 function formatReg(regStr) {
-  const flags = regStr.replace(/.*\/([gimy]*)$/, "$1");
-  const pattern = flags.replace(new RegExp("^/(.*?)/" + flags + "$"), "$1");
+  const flags = regStr.replace(/.*\/([gimy]*)$/, '$1');
+  const pattern = regStr.replace(new RegExp('^/(.*?)/' + flags + '$'), '$1');
   return new RegExp(pattern, flags);
 }
 
 function searchKeyValues(lists, value, strict = false) {
   return lists.filter((item) => {
-    if (typeof item === "string") {
-      return item.toLowerCase().indexOf(value.toLowerCase()) >= 0;
+    if (typeof item === 'string') {
+      return !!PinyinMatch.match(item, value);
     }
-    if (item.type === "regex" && !strict) {
+    if (item.type === 'regex' && !strict) {
       return formatReg(item.match).test(value);
+    }
+    if (item.type === 'over' && !strict) {
+      return true;
     }
     return false;
   });
@@ -31,13 +36,24 @@ const optionsManager = ({
   const optionsRef = ref([]);
 
   // 全局快捷键
-  ipcRenderer.on("global-short-key", (e, msg) => {
+  ipcRenderer.on('global-short-key', (e, msg) => {
     const options = getOptionsFromSearchValue(msg, true);
     options[0].click();
   });
 
+  const getIndex = (cmd, value) => {
+    let index = 0;
+    if (PinyinMatch.match(cmd.label || cmd, value)) {
+      index += 1;
+    }
+    if (cmd.label) {
+      index -= 1;
+    }
+    return index;
+  };
+
   const getOptionsFromSearchValue = (value, strict = false) => {
-    const localPlugins = remote.getGlobal("LOCAL_PLUGINS").getLocalPlugins();
+    const localPlugins = getGlobal('LOCAL_PLUGINS').getLocalPlugins();
     let options: any = [];
     // todo 先搜索 plugin
     localPlugins.forEach((plugin) => {
@@ -48,29 +64,34 @@ const optionsManager = ({
         const cmds = searchKeyValues(fe.cmds, value, strict);
         options = [
           ...options,
-          ...cmds.map((cmd) => ({
-            name: cmd.label || cmd,
-            value: "plugin",
-            icon: plugin.logo,
-            desc: fe.explain,
-            type: plugin.pluginType,
-            zIndex: cmd.label ? 0 : 1, // 排序权重
-            click: () => {
-              pluginClickEvent({
-                plugin,
-                fe,
-                cmd,
-                ext: cmd.type
-                  ? {
-                      code: fe.code,
-                      type: cmd.type || "text",
-                      payload: searchValue.value,
-                    }
-                  : null,
-                openPlugin,
-              });
-            },
-          })),
+          ...cmds.map((cmd) => {
+            const option = {
+              name: cmd.label || cmd,
+              value: 'plugin',
+              icon: plugin.logo,
+              desc: fe.explain,
+              type: plugin.pluginType,
+              match: PinyinMatch.match(cmd.label || cmd, value),
+              zIndex: getIndex(cmd, value), // 排序权重
+              click: () => {
+                pluginClickEvent({
+                  plugin,
+                  fe,
+                  cmd,
+                  ext: cmd.type
+                    ? {
+                        code: fe.code,
+                        type: cmd.type || 'text',
+                        payload: searchValue.value,
+                      }
+                    : null,
+                  openPlugin,
+                  option,
+                });
+              },
+            };
+            return option;
+          }),
         ];
       });
     });
@@ -85,13 +106,16 @@ const optionsManager = ({
             descMap.set(plugin, true);
             let has = false;
             plugin.keyWords.some((keyWord) => {
+              const match = PinyinMatch.match(keyWord, value);
               if (
-                keyWord
-                  .toLocaleUpperCase()
-                  .indexOf(value.toLocaleUpperCase()) >= 0
+                // keyWord
+                //   .toLocaleUpperCase()
+                //   .indexOf(value.toLocaleUpperCase()) >= 0 ||
+                match
               ) {
                 has = keyWord;
                 plugin.name = keyWord;
+                plugin.match = match;
                 return true;
               }
               return false;
@@ -102,13 +126,14 @@ const optionsManager = ({
           }
         })
         .map((plugin) => {
-          return {
+          const option = {
             ...plugin,
-            zIndex: 1,
+            zIndex: 0,
             click: () => {
-              openPlugin(plugin);
+              openPlugin(plugin, option);
             },
           };
+          return option;
         }),
     ];
     return options;
@@ -116,7 +141,7 @@ const optionsManager = ({
 
   watch(searchValue, () => search(searchValue.value));
   // search Input operation
-  const search = throttle((value) => {
+  const search = debounce((value) => {
     if (currentPlugin.value.name) return;
     if (clipboardFile.value.length) return;
     if (!value) {
@@ -124,7 +149,7 @@ const optionsManager = ({
       return;
     }
     optionsRef.value = getOptionsFromSearchValue(value);
-  }, 500);
+  }, 100);
 
   const setOptionsRef = (options) => {
     optionsRef.value = options;
@@ -143,6 +168,7 @@ const optionsManager = ({
   });
 
   return {
+    setOptionsRef,
     options: optionsRef,
     searchFocus,
     clipboardFile,
