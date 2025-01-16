@@ -1,32 +1,34 @@
-import getCopyFiles from "@/common/utils/getCopyFiles";
-import { clipboard, nativeImage, remote, ipcRenderer } from "electron";
-import path from "path";
-import pluginClickEvent from "./pluginClickEvent";
-import { ref } from "vue";
+import getCopyFiles from '@/common/utils/getCopyFiles';
+import { clipboard, nativeImage, ipcRenderer } from 'electron';
+import { getGlobal } from '@electron/remote';
+import path from 'path';
+import pluginClickEvent from './pluginClickEvent';
+import localConfig from '../confOp';
+import { ref } from 'vue';
 
 export default ({ currentPlugin, optionsRef, openPlugin, setOptionsRef }) => {
   const clipboardFile: any = ref([]);
-  const searchFocus = () => {
-    const config = remote.getGlobal("OP_CONFIG").get();
+  const searchFocus = (files, strict = true) => {
+    const config: any = localConfig.getConfig();
     // 未开启自动粘贴
-    if (!config.perf.common.autoPast) return;
+    if (!config.perf.common.autoPast && strict) return;
 
     if (currentPlugin.value.name) return;
-    const fileList = getCopyFiles();
+    const fileList = files || getCopyFiles();
     // 拷贝的是文件
     if (fileList) {
-      window.setSubInputValue({ value: "" });
+      window.setSubInputValue({ value: '' });
       clipboardFile.value = fileList;
-      const localPlugins = remote.getGlobal("LOCAL_PLUGINS").getLocalPlugins();
+      const localPlugins = getGlobal('LOCAL_PLUGINS').getLocalPlugins();
       const options: any = [
         {
-          name: "复制路径",
-          value: "plugin",
-          icon: require("../assets/link.png"),
-          desc: "复制路径到剪切板",
+          name: '复制路径',
+          value: 'plugin',
+          icon: require('../assets/link.png'),
+          desc: '复制路径到剪切板',
           click: () => {
-            clipboard.writeText(fileList.map((file) => file.path).join(","));
-            ipcRenderer.send("msg-trigger", { type: "hideMainWindow" });
+            clipboard.writeText(fileList.map((file) => file.path).join(','));
+            ipcRenderer.send('msg-trigger', { type: 'hideMainWindow' });
           },
         },
       ];
@@ -41,81 +43,86 @@ export default ({ currentPlugin, optionsRef, openPlugin, setOptionsRef }) => {
       }
 
       // 再正则插件
-      localPlugins.forEach((plugin) => {
-        const feature = plugin.features;
-        // 系统插件无 features 的情况，不需要再搜索
-        if (!feature) return;
-        feature.forEach((fe) => {
-          const ext = path.extname(fileList[0].path);
-          fe.cmds.forEach((cmd) => {
-            const regImg = /\.(png|jpg|gif|jpeg|webp)$/;
-            if (
-              cmd.type === "img" &&
-              regImg.test(ext) &&
-              fileList.length === 1
-            ) {
-              options.push({
-                name: cmd.label,
-                value: "plugin",
-                icon: plugin.logo,
-                desc: fe.explain,
-                type: plugin.pluginType,
-                click: () => {
-                  pluginClickEvent({
-                    plugin,
-                    fe,
-                    cmd,
-                    ext: {
-                      code: fe.code,
-                      type: cmd.type || "text",
-                      payload: nativeImage
-                        .createFromPath(fileList[0].path)
-                        .toDataURL(),
-                    },
-                    openPlugin,
-                  });
-                  clearClipboardFile();
-                },
-              });
-            }
-            // 如果是文件，且符合文件正则类型
-            if (
-              fileList.length > 1 ||
-              (cmd.type === "file" && new RegExp(cmd.match).test(ext))
-            ) {
-              options.push({
-                name: cmd,
-                value: "plugin",
-                icon: plugin.logo,
-                desc: fe.explain,
-                type: plugin.pluginType,
-                click: () => {
-                  pluginClickEvent({
-                    plugin,
-                    fe,
-                    cmd,
-                    ext: {
-                      code: fe.code,
-                      type: cmd.type || "text",
-                      payload: fileList,
-                    },
-                    openPlugin,
-                  });
-                  clearClipboardFile();
-                },
-              });
-            }
+      if (fileList.length === 1) {
+        localPlugins.forEach((plugin) => {
+          const feature = plugin.features;
+          // 系统插件无 features 的情况，不需要再搜索
+          if (!feature) return;
+          feature.forEach((fe) => {
+            const ext = path.extname(fileList[0].path);
+            fe.cmds.forEach((cmd) => {
+              const regImg = /\.(png|jpg|gif|jpeg|webp)$/;
+              if (
+                cmd.type === 'img' &&
+                regImg.test(ext) &&
+                fileList.length === 1
+              ) {
+                const option = {
+                  name: cmd.label,
+                  value: 'plugin',
+                  icon: plugin.logo,
+                  desc: fe.explain,
+                  type: plugin.pluginType,
+                  click: () => {
+                    pluginClickEvent({
+                      plugin,
+                      fe,
+                      cmd,
+                      ext: {
+                        code: fe.code,
+                        type: cmd.type || 'text',
+                        payload: nativeImage
+                          .createFromPath(fileList[0].path)
+                          .toDataURL(),
+                      },
+                      openPlugin,
+                      option,
+                    });
+                    clearClipboardFile();
+                  },
+                };
+                options.push(option);
+              }
+              // 如果是文件，且符合文件正则类型
+              if (
+                fileList.length > 1 ||
+                (cmd.type === 'file' && new RegExp(cmd.match).test(ext))
+              ) {
+                const option = {
+                  name: cmd,
+                  value: 'plugin',
+                  icon: plugin.logo,
+                  desc: fe.explain,
+                  type: plugin.pluginType,
+                  click: () => {
+                    pluginClickEvent({
+                      plugin,
+                      fe,
+                      cmd,
+                      option,
+                      ext: {
+                        code: fe.code,
+                        type: cmd.type || 'text',
+                        payload: fileList,
+                      },
+                      openPlugin,
+                    });
+                    clearClipboardFile();
+                  },
+                };
+                options.push(option);
+              }
+            });
           });
         });
-      });
-
+      }
       setOptionsRef(options);
       clipboard.clear();
       return;
     }
     const clipboardType = clipboard.availableFormats();
     if (!clipboardType.length) return;
-    if ("text/plain" === clipboardType[0]) {
+    if ('text/plain' === clipboardType[0]) {
       const contentText = clipboard.readText();
       if (contentText.trim()) {
         clearClipboardFile();
@@ -134,7 +141,7 @@ export default ({ currentPlugin, optionsRef, openPlugin, setOptionsRef }) => {
     // read image
     const img = clipboard.readImage();
     const dataUrl = img.toDataURL();
-    if (!dataUrl.replace("data:image/png;base64,", "")) return;
+    if (!dataUrl.replace('data:image/png;base64,', '')) return;
     clipboardFile.value = [
       {
         isFile: true,
@@ -143,7 +150,7 @@ export default ({ currentPlugin, optionsRef, openPlugin, setOptionsRef }) => {
         dataUrl,
       },
     ];
-    const localPlugins = remote.getGlobal("LOCAL_PLUGINS").getLocalPlugins();
+    const localPlugins = getGlobal('LOCAL_PLUGINS').getLocalPlugins();
     const options: any = [];
     // 再正则插件
     localPlugins.forEach((plugin) => {
@@ -152,10 +159,10 @@ export default ({ currentPlugin, optionsRef, openPlugin, setOptionsRef }) => {
       if (!feature) return;
       feature.forEach((fe) => {
         fe.cmds.forEach((cmd) => {
-          if (cmd.type === "img") {
-            options.push({
+          if (cmd.type === 'img') {
+            const option = {
               name: cmd.label,
-              value: "plugin",
+              value: 'plugin',
               icon: plugin.logo,
               desc: fe.explain,
               type: plugin.pluginType,
@@ -166,14 +173,16 @@ export default ({ currentPlugin, optionsRef, openPlugin, setOptionsRef }) => {
                   cmd,
                   ext: {
                     code: fe.code,
-                    type: cmd.type || "text",
+                    type: cmd.type || 'text',
                     payload: dataUrl,
                   },
                   openPlugin,
+                  option,
                 });
                 clearClipboardFile();
               },
-            });
+            };
+            options.push(option);
           }
         });
       });
